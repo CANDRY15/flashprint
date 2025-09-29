@@ -57,6 +57,32 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // FlashPrint brand colors
+        flashprint: {
+          red: "hsl(var(--flashprint-red))",
+          orange: "hsl(var(--flashprint-orange))",
+          yellow: "hsl(var(--flashprint-yellow))",
+        },
+      },
+      fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
+        'poppins': ['Poppins', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-brand': 'var(--gradient-primary)',
+        'gradient-accent': 'var(--gradient-accent)',
+        'gradient-subtle': 'var(--gradient-subtle)',
+      },
+      boxShadow: {
+        'brand': 'var(--shadow-brand)',
+        'glow': 'var(--shadow-glow)',
+        'subtle': 'var(--shadow-subtle)',
+      },
+      animation: {
+        'float': 'float 3s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
       borderRadius: {
         lg: "var(--radius)",
