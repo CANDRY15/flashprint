@@ -14,7 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      faculties: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          is_admin: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          is_admin?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_admin?: boolean | null
+        }
+        Relationships: []
+      }
+      syllabus: {
+        Row: {
+          created_at: string | null
+          faculty_id: string | null
+          file_size: string | null
+          file_url: string | null
+          id: string
+          popular: boolean | null
+          professor: string
+          qr_code: string
+          title: string
+          updated_at: string | null
+          year: string
+        }
+        Insert: {
+          created_at?: string | null
+          faculty_id?: string | null
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          popular?: boolean | null
+          professor: string
+          qr_code: string
+          title: string
+          updated_at?: string | null
+          year: string
+        }
+        Update: {
+          created_at?: string | null
+          faculty_id?: string | null
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          popular?: boolean | null
+          professor?: string
+          qr_code?: string
+          title?: string
+          updated_at?: string | null
+          year?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
