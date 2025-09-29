@@ -30,28 +30,28 @@ const ContactSection = () => {
     {
       icon: Phone,
       title: "Téléphone",
-      details: ["+243 000 000 000", "+243 111 111 111"],
+      details: ["+243 815 050 397"],
       action: "Appeler maintenant",
-      href: "tel:+243000000000"
+      href: "tel:+2430815050397"
     },
     {
       icon: MessageCircle,
       title: "WhatsApp Business",
       details: ["Réponse rapide", "Service 24/7"],
       action: "Ouvrir WhatsApp",
-      href: "https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services."
+      href: "https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services."
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["contact@flashprint.cd", "info@flashprint.cd"],
+      details: ["contact@flashprint.cd"],
       action: "Envoyer un email",
       href: "mailto:contact@flashprint.cd"
     },
     {
       icon: MapPin,
       title: "Localisation",
-      details: ["Avenue Kassongo", "Quartier Kenya, Lubumbashi"],
+      details: ["Lubumbashi, Kasapa", "Campus, H4C320"],
       action: "Voir sur Maps",
       href: "#"
     },
@@ -86,8 +86,8 @@ ${formData.phone ? `Téléphone: ${formData.phone}` : ''}
 Message: ${formData.message}`;
 
     // Rediriger vers WhatsApp
-    window.open(`https://wa.me/243000000000?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
-    
+    window.open(`https://wa.me/2430815050397?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+
     // Reset form
     setFormData({ name: "", email: "", phone: "", message: "" });
     
@@ -260,7 +260,7 @@ Message: ${formData.message}`;
                     </a>
                   </Button>
                   <Button variant="outline" size="icon" asChild>
-                    <a href="https://wa.me/243000000000" target="_blank" rel="noopener noreferrer">
+                    <a href="https://wa.me/2430815050397" target="_blank" rel="noopener noreferrer">
                       <MessageCircle className="h-4 w-4" />
                     </a>
                   </Button>

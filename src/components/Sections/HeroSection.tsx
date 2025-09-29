@@ -43,7 +43,7 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Button size="lg" className="shadow-glow animate-glow text-lg px-8 py-6" asChild>
               <a 
-                href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite commander des services d'impression."
+                href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite commander des services d'impression."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2"
@@ -52,7 +52,7 @@ const HeroSection = () => {
                 <ArrowRight className="h-5 w-5" />
               </a>
             </Button>
-            
+
             <Button variant="outline" size="lg" className="bg-white/10 backdrop-blur border-white/20 text-white hover:bg-white/20 text-lg px-8 py-6">
               <QrCode className="h-5 w-5 mr-2" />
               Découvrir la bibliothèque

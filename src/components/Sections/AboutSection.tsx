@@ -134,7 +134,7 @@ const AboutSection = () => {
           </p>
           <Button variant="hero" size="lg" asChild>
             <a 
-              href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite en savoir plus sur votre mission et vos services."
+              href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur votre mission et vos services."
               target="_blank"
               rel="noopener noreferrer"
             >

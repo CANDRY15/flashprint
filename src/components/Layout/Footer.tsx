@@ -72,7 +72,7 @@ const Footer = () => {
                 </a>
               </Button>
               <Button variant="outline" size="icon" className="border-gray-600 text-gray-300 hover:bg-white/10" asChild>
-                <a href="https://wa.me/243000000000" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/2430815050397" target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-4 w-4" />
                 </a>
               </Button>
@@ -117,18 +117,18 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-gray-300 text-sm">Avenue Kassongo</p>
-                  <p className="text-gray-300 text-sm">Quartier Kenya, Lubumbashi</p>
+                  <p className="text-gray-300 text-sm">Lubumbashi, Kasapa</p>
+                  <p className="text-gray-300 text-sm">Campus, H4C320</p>
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-accent flex-shrink-0" />
-                <a href="tel:+243000000000" className="text-gray-300 hover:text-white transition-smooth text-sm">
-                  +243 000 000 000
+                <a href="tel:+2430815050397" className="text-gray-300 hover:text-white transition-smooth text-sm">
+                  +243 815 050 397
                 </a>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-accent flex-shrink-0" />
                 <a href="mailto:contact@flashprint.cd" className="text-gray-300 hover:text-white transition-smooth text-sm">
@@ -143,7 +143,7 @@ const Footer = () => {
                 asChild
               >
                 <a 
-                  href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services."
+                  href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services."
                   target="_blank"
                   rel="noopener noreferrer"
                 >

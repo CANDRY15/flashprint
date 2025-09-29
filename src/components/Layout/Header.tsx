@@ -55,14 +55,14 @@ const Header = () => {
           {/* Contact Buttons */}
           <div className="hidden lg:flex items-center space-x-2">
             <Button variant="outline" size="sm" asChild>
-              <a href="tel:+243000000000" className="flex items-center space-x-2">
+              <a href="tel:+2430815050397" className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
                 <span>Appeler</span>
               </a>
             </Button>
             <Button variant="default" size="sm" asChild>
               <a 
-                href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
+                href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2"
@@ -96,14 +96,14 @@ const Header = () => {
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t">
                 <Button variant="outline" size="sm" asChild>
-                  <a href="tel:+243000000000" className="flex items-center justify-center space-x-2">
+                  <a href="tel:+2430815050397" className="flex items-center justify-center space-x-2">
                     <Phone className="h-4 w-4" />
                     <span>Appeler</span>
                   </a>
                 </Button>
                 <Button variant="default" size="sm" asChild>
                   <a 
-                    href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
+                    href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center space-x-2"

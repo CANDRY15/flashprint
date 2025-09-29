@@ -103,7 +103,7 @@ const LibrarySection = () => {
   const handleDownload = (title: string, qrCode: string) => {
     // Simulation du téléchargement
     const whatsappMessage = `Bonjour FlashPrint, je souhaite télécharger le syllabus "${title}" (Code: ${qrCode})`;
-    window.open(`https://wa.me/243000000000?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+    window.open(`https://wa.me/2430815050397?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
   };
 
   return (
@@ -262,7 +262,7 @@ const LibrarySection = () => {
           </p>
           <Button variant="outline" size="lg" asChild>
             <a 
-              href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaiterais ajouter un syllabus à votre bibliothèque numérique."
+              href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaiterais ajouter un syllabus à votre bibliothèque numérique."
               target="_blank"
               rel="noopener noreferrer"
             >

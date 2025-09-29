@@ -84,7 +84,7 @@ const ServicesSection = () => {
                     asChild
                   >
                     <a 
-                      href={`https://wa.me/243000000000?text=Bonjour, je souhaite en savoir plus sur ${service.title}`}
+                      href={`https://wa.me/2430815050397?text=Bonjour, je souhaite en savoir plus sur ${service.title}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -121,7 +121,7 @@ const ServicesSection = () => {
             </div>
             <Button size="lg" className="mt-8 shadow-brand" asChild>
               <a 
-                href="https://wa.me/243000000000?text=Bonjour FlashPrint, je souhaiterais un devis pour mes impressions."
+                href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaiterais un devis pour mes impressions."
                 target="_blank"
                 rel="noopener noreferrer"
               >
