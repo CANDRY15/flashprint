@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Phone, Mail, LogIn, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import flashprintLogo from "@/assets/flashprint-logo.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const menuItems = [
     { label: "Accueil", href: "#accueil" },
@@ -52,7 +56,7 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Contact Buttons */}
+          {/* Contact & Auth Buttons */}
           <div className="hidden lg:flex items-center space-x-2">
             <Button variant="outline" size="sm" asChild>
               <a href="tel:+2430815050397" className="flex items-center space-x-2">
@@ -60,7 +64,7 @@ const Header = () => {
                 <span>Appeler</span>
               </a>
             </Button>
-            <Button variant="default" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild>
               <a 
                 href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
                 target="_blank"
@@ -70,6 +74,24 @@ const Header = () => {
                 <span>WhatsApp</span>
               </a>
             </Button>
+            {user ? (
+              isAdmin ? (
+                <Button onClick={() => navigate('/admin')} variant="default" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Admin
+                </Button>
+              ) : (
+                <Button onClick={() => navigate('/auth')} variant="outline" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Compte
+                </Button>
+              )
+            ) : (
+              <Button onClick={() => navigate('/auth')} variant="default" size="sm">
+                <LogIn className="h-4 w-4 mr-2" />
+                Connexion
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -101,7 +123,7 @@ const Header = () => {
                     <span>Appeler</span>
                   </a>
                 </Button>
-                <Button variant="default" size="sm" asChild>
+                <Button variant="outline" size="sm" asChild>
                   <a 
                     href="https://wa.me/2430815050397?text=Bonjour FlashPrint, je souhaite en savoir plus sur vos services d'impression."
                     target="_blank"
@@ -111,6 +133,24 @@ const Header = () => {
                     <span>WhatsApp</span>
                   </a>
                 </Button>
+                {user ? (
+                  isAdmin ? (
+                    <Button onClick={() => { navigate('/admin'); setIsMenuOpen(false); }} variant="default" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      Admin
+                    </Button>
+                  ) : (
+                    <Button onClick={() => { navigate('/auth'); setIsMenuOpen(false); }} variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      Compte
+                    </Button>
+                  )
+                ) : (
+                  <Button onClick={() => { navigate('/auth'); setIsMenuOpen(false); }} variant="default" size="sm">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Connexion
+                  </Button>
+                )}
               </div>
             </nav>
           </div>
