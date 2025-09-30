@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { QRCodeSVG } from 'qrcode.react';
+import { z } from "zod";
 
 interface Faculty {
   id: string;
@@ -31,6 +32,27 @@ interface Syllabus {
   faculty_id: string;
   faculties: { name: string };
 }
+
+// Validation schemas
+const syllabusSchema = z.object({
+  title: z.string()
+    .trim()
+    .min(3, "Le titre doit contenir au moins 3 caractères")
+    .max(200, "Le titre ne peut pas dépasser 200 caractères"),
+  professor: z.string()
+    .trim()
+    .min(2, "Le nom du professeur doit contenir au moins 2 caractères")
+    .max(100, "Le nom du professeur ne peut pas dépasser 100 caractères"),
+  year: z.enum(["L1", "L2", "L3"], {
+    errorMap: () => ({ message: "Année invalide" })
+  }),
+  facultyId: z.string()
+    .uuid("Veuillez sélectionner une faculté valide"),
+  popular: z.boolean()
+});
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_FILE_TYPES = ['application/pdf'];
 
 const Admin = () => {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -110,11 +132,55 @@ const Admin = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate form data
+      const validationResult = syllabusSchema.safeParse({
+        title,
+        professor,
+        year,
+        facultyId,
+        popular
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: "Validation échouée",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate file if present
+      if (file) {
+        if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+          toast({
+            title: "Type de fichier invalide",
+            description: "Seuls les fichiers PDF sont acceptés",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          toast({
+            title: "Fichier trop volumineux",
+            description: "La taille maximale est de 10 MB",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       let fileUrl = null;
       let fileSize = null;
 
       if (file) {
-        const fileName = `${Date.now()}-${file.name}`;
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const fileName = `${Date.now()}-${sanitizedFileName}`;
         const { error: uploadError } = await supabase.storage
           .from('syllabus')
           .upload(fileName, file);
@@ -134,17 +200,26 @@ const Admin = () => {
       const { error } = await supabase
         .from('syllabus')
         .insert({
-          title,
-          professor,
-          year,
-          faculty_id: facultyId,
+          title: validationResult.data.title,
+          professor: validationResult.data.professor,
+          year: validationResult.data.year,
+          faculty_id: validationResult.data.facultyId,
           file_url: fileUrl,
           file_size: fileSize,
           qr_code: qrCode,
-          popular,
+          popular: validationResult.data.popular,
         });
 
       if (error) throw error;
+
+      // Log admin action
+      await supabase.rpc('log_admin_action', {
+        _action: 'create_syllabus',
+        _details: { 
+          title: validationResult.data.title,
+          qr_code: qrCode 
+        }
+      });
 
       toast({
         title: "Succès",
@@ -164,7 +239,7 @@ const Admin = () => {
     } catch (error: any) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur s'est produite",
         variant: "destructive",
       });
     } finally {
@@ -172,7 +247,7 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, syllabusTitle: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce syllabus ?")) return;
 
     try {
@@ -183,6 +258,15 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Log admin action
+      await supabase.rpc('log_admin_action', {
+        _action: 'delete_syllabus',
+        _details: { 
+          syllabus_id: id,
+          title: syllabusTitle
+        }
+      });
+
       toast({
         title: "Succès",
         description: "Syllabus supprimé",
@@ -192,7 +276,7 @@ const Admin = () => {
     } catch (error: any) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Erreur lors de la suppression",
         variant: "destructive",
       });
     }
@@ -219,7 +303,12 @@ const Admin = () => {
   const shareViaWhatsApp = () => {
     if (!selectedSyllabus) return;
     
-    const message = `Syllabus: ${selectedSyllabus.title}\nProfesseur: ${selectedSyllabus.professor}\nCode QR: ${selectedSyllabus.qr_code}\n\nScannez le QR code ou contactez FlashPrint pour obtenir ce syllabus.`;
+    // Sanitize message content
+    const sanitizedTitle = selectedSyllabus.title.substring(0, 200);
+    const sanitizedProfessor = selectedSyllabus.professor.substring(0, 100);
+    const sanitizedQrCode = selectedSyllabus.qr_code.substring(0, 50);
+    
+    const message = `Syllabus: ${sanitizedTitle}\nProfesseur: ${sanitizedProfessor}\nCode QR: ${sanitizedQrCode}\n\nScannez le QR code ou contactez FlashPrint pour obtenir ce syllabus.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -272,6 +361,7 @@ const Admin = () => {
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    maxLength={200}
                     required
                   />
                 </div>
@@ -281,6 +371,7 @@ const Admin = () => {
                     id="professor"
                     value={professor}
                     onChange={(e) => setProfessor(e.target.value)}
+                    maxLength={100}
                     required
                   />
                 </div>
@@ -375,7 +466,7 @@ const Admin = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(item.id, item.title)}
                     >
                       Supprimer
                     </Button>

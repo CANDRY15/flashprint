@@ -8,6 +8,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, BookOpen } from "lucide-react";
 import { useEffect } from "react";
+import { z } from "zod";
+import { toast } from "@/hooks/use-toast";
+
+// Validation schemas
+const emailSchema = z.string().email("Email invalide").max(255, "Email trop long");
+const passwordSchema = z.string()
+  .min(6, "Le mot de passe doit contenir au moins 6 caractères")
+  .max(100, "Le mot de passe ne peut pas dépasser 100 caractères");
+
+const authSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema
+});
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -27,9 +40,23 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signIn(email, password);
+      // Validate input
+      const validationResult = authSchema.safeParse({ email, password });
+      
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: "Validation échouée",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      await signIn(validationResult.data.email, validationResult.data.password);
     } catch (error) {
-      console.error('Sign in error:', error);
+      // Error is handled in AuthContext
     } finally {
       setIsLoading(false);
     }
@@ -39,11 +66,25 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signUp(email, password);
+      // Validate input
+      const validationResult = authSchema.safeParse({ email, password });
+      
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: "Validation échouée",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      await signUp(validationResult.data.email, validationResult.data.password);
       setEmail("");
       setPassword("");
     } catch (error) {
-      console.error('Sign up error:', error);
+      // Error is handled in AuthContext
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +127,7 @@ const Auth = () => {
                       placeholder="votre@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      maxLength={255}
                       required
                       disabled={isLoading}
                     />
@@ -98,6 +140,8 @@ const Auth = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      minLength={6}
+                      maxLength={100}
                       required
                       disabled={isLoading}
                     />
@@ -135,6 +179,7 @@ const Auth = () => {
                       placeholder="votre@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      maxLength={255}
                       required
                       disabled={isLoading}
                     />
@@ -147,9 +192,10 @@ const Auth = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      minLength={6}
+                      maxLength={100}
                       required
                       disabled={isLoading}
-                      minLength={6}
                     />
                     <p className="text-xs text-muted-foreground">
                       Minimum 6 caractères
