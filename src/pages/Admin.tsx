@@ -121,10 +121,10 @@ const Admin = () => {
     setSyllabusList(data || []);
   };
 
-  const generateQrCode = () => {
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(7).toUpperCase();
-    return `FP-${random}-${timestamp}`;
+  const generateQrCode = (syllabusId: string) => {
+    // Generate URL that points to the syllabus view page
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/syllabus/${syllabusId}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -195,9 +195,8 @@ const Admin = () => {
         fileSize = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
       }
 
-      const qrCode = generateQrCode();
-      
-      const { error } = await supabase
+      // First insert the syllabus to get the ID
+      const { data: insertedData, error: insertError } = await supabase
         .from('syllabus')
         .insert({
           title: validationResult.data.title,
@@ -206,11 +205,24 @@ const Admin = () => {
           faculty_id: validationResult.data.facultyId,
           file_url: fileUrl,
           file_size: fileSize,
-          qr_code: qrCode,
+          qr_code: 'temporary', // Temporary value
           popular: validationResult.data.popular,
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (insertError) throw insertError;
+
+      // Generate QR code URL with the syllabus ID
+      const qrCode = generateQrCode(insertedData.id);
+      
+      // Update the syllabus with the actual QR code
+      const { error: updateError } = await supabase
+        .from('syllabus')
+        .update({ qr_code: qrCode })
+        .eq('id', insertedData.id);
+
+      if (updateError) throw updateError;
 
       // Log admin action
       await supabase.rpc('log_admin_action', {
