@@ -26,15 +26,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         // Check admin status when session changes
         if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus(session.user.id);
-          }, 0);
+          await checkAdminStatus(session.user.id);
         } else {
           setIsAdmin(false);
         }
@@ -42,12 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminStatus(session.user.id);
+        await checkAdminStatus(session.user.id);
       }
       setLoading(false);
     });
@@ -61,10 +59,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .select('is_admin')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      setIsAdmin(data?.is_admin || false);
+      
+      // If no profile exists, create one
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ id: userId, is_admin: false });
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        }
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(data.is_admin || false);
+      }
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
