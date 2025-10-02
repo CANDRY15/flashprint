@@ -75,17 +75,10 @@ const Header = () => {
               </a>
             </Button>
             {user ? (
-              isAdmin ? (
-                <Button onClick={() => navigate('/admin')} variant="default" size="sm">
-                  <User className="h-4 w-4 mr-2" />
-                  Admin
-                </Button>
-              ) : (
-                <Button onClick={() => navigate('/auth')} variant="outline" size="sm">
-                  <User className="h-4 w-4 mr-2" />
-                  Compte
-                </Button>
-              )
+              <Button onClick={() => navigate('/admin')} variant="default" size="sm">
+                <User className="h-4 w-4 mr-2" />
+                {isAdmin ? 'Admin' : 'Mon Compte'}
+              </Button>
             ) : (
               <Button onClick={() => navigate('/auth')} variant="default" size="sm">
                 <LogIn className="h-4 w-4 mr-2" />
@@ -134,17 +127,10 @@ const Header = () => {
                   </a>
                 </Button>
                 {user ? (
-                  isAdmin ? (
-                    <Button onClick={() => { navigate('/admin'); setIsMenuOpen(false); }} variant="default" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      Admin
-                    </Button>
-                  ) : (
-                    <Button onClick={() => { navigate('/auth'); setIsMenuOpen(false); }} variant="outline" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      Compte
-                    </Button>
-                  )
+                  <Button onClick={() => { navigate('/admin'); setIsMenuOpen(false); }} variant="default" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    {isAdmin ? 'Admin' : 'Mon Compte'}
+                  </Button>
                 ) : (
                   <Button onClick={() => { navigate('/auth'); setIsMenuOpen(false); }} variant="default" size="sm">
                     <LogIn className="h-4 w-4 mr-2" />
