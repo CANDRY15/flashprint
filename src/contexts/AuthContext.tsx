@@ -9,7 +9,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -119,19 +119,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Erreur d'inscription",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
       
       toast({
         title: "Inscription réussie",
         description: "Vous pouvez maintenant vous connecter.",
       });
+      
+      return { error: null };
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
         description: error.message,
         variant: "destructive",
       });
-      throw error;
+      return { error };
     }
   };
 

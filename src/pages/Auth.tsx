@@ -25,7 +25,8 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -35,7 +36,7 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -53,7 +54,18 @@ const Auth = () => {
         return;
       }
 
-      await signIn(validationResult.data.email, validationResult.data.password);
+      if (isSignUp) {
+        const { error } = await signUp(validationResult.data.email, validationResult.data.password);
+        if (!error) {
+          toast({
+            title: "Compte créé avec succès",
+            description: "Vous pouvez maintenant vous connecter",
+          });
+          setIsSignUp(false);
+        }
+      } else {
+        await signIn(validationResult.data.email, validationResult.data.password);
+      }
     } catch (error) {
       // Error is handled in AuthContext
     } finally {
@@ -77,13 +89,16 @@ const Auth = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Connexion Administrateur</CardTitle>
+            <CardTitle>{isSignUp ? "Créer un compte" : "Connexion Administrateur"}</CardTitle>
             <CardDescription>
-              Entrez vos identifiants pour accéder à l'administration
+              {isSignUp 
+                ? "Créez un compte pour accéder à l'administration"
+                : "Entrez vos identifiants pour accéder à l'administration"
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signin-email">Email</Label>
                 <Input
@@ -115,12 +130,25 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connexion...
+                    {isSignUp ? "Création..." : "Connexion..."}
                   </>
                 ) : (
-                  "Se connecter"
+                  isSignUp ? "Créer un compte" : "Se connecter"
                 )}
               </Button>
+              <div className="text-center text-sm">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-primary hover:underline"
+                  disabled={isLoading}
+                >
+                  {isSignUp 
+                    ? "Vous avez déjà un compte ? Connectez-vous"
+                    : "Pas de compte ? Créez-en un"
+                  }
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
