@@ -65,19 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) throw error;
       
-      // If no profile exists, create one
-      if (!data) {
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({ id: userId, is_admin: false });
-        
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-        }
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data.is_admin || false);
-      }
+      // Profile should be created automatically by trigger
+      // If no profile exists, user is not admin
+      setIsAdmin(data?.is_admin || false);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
