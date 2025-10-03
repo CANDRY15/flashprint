@@ -63,10 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
       
-      // Profile should be created automatically by trigger
-      // If no profile exists, user is not admin
+      // Profile should exist (created by trigger)
+      // If no profile exists, default to not admin
       setIsAdmin(data?.is_admin || false);
     } catch (error) {
       console.error('Error checking admin status:', error);
