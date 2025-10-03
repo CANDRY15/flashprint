@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, LogOut } from "lucide-react";
+import { Loader2, Plus, Share2, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,9 +53,8 @@ const syllabusSchema = z.object({
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf'];
 
-const Admin = () => {
-  const { user, isAdmin, signOut, loading } = useAuth();
-  const navigate = useNavigate();
+const SyllabusManagement = () => {
+  const { user } = useAuth();
   const [syllabusList, setSyllabusList] = useState<Syllabus[]>([]);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -73,17 +71,9 @@ const Admin = () => {
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
-      navigate('/auth');
-    }
-  }, [user, isAdmin, loading, navigate]);
-
-  useEffect(() => {
-    if (user && isAdmin) {
-      fetchFaculties();
-      fetchSyllabus();
-    }
-  }, [user, isAdmin]);
+    fetchFaculties();
+    fetchSyllabus();
+  }, []);
 
   const fetchFaculties = async () => {
     const { data, error } = await supabase
@@ -324,34 +314,16 @@ const Admin = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  if (loading || !user || !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold font-poppins">Administration FlashPrint</h1>
-            <p className="text-muted-foreground">Gestion des syllabus</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              Retour
-            </Button>
-            <Button variant="outline" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Déconnexion
-            </Button>
-          </div>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold font-poppins">Gestion des Syllabus</h1>
+          <p className="text-muted-foreground">Ajoutez et gérez vos syllabus</p>
         </div>
+      </div>
 
-        <div className="mb-6">
+      <div className="mb-6">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -530,4 +502,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default SyllabusManagement;
