@@ -57,23 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Just check if admin - the trigger creates the profile automatically
+      const { data } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', userId)
         .maybeSingle();
       
-      if (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-        return;
-      }
-      
-      // Profile should exist (created by trigger)
-      // If no profile exists, default to not admin
       setIsAdmin(data?.is_admin || false);
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      // Ignore errors, just set to false
       setIsAdmin(false);
     }
   };
