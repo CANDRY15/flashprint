@@ -497,7 +497,6 @@ const SyllabusManagement = () => {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
     </div>
   );
 };
