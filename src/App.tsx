@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import SyllabusManagement from "./pages/admin/SyllabusManagement";
+import QRCodeGenerator from "./pages/admin/QRCodeGenerator";
 import SyllabusView from "./pages/SyllabusView";
 import NotFound from "./pages/NotFound";
 
@@ -24,10 +25,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="syllabus" element={<SyllabusManagement />} />
-            </Route>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="syllabus" element={<SyllabusManagement />} />
+            <Route path="qr-generator" element={<QRCodeGenerator />} />
+          </Route>
             <Route path="/syllabus/:id" element={<SyllabusView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
