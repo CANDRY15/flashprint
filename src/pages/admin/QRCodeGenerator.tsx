@@ -200,13 +200,26 @@ const QRCodeGenerator = () => {
   };
 
   const downloadQrCode = () => {
-    const canvas = document.querySelector('#qr-preview canvas') as HTMLCanvasElement;
-    if (canvas) {
-      const url = canvas.toDataURL();
-      const link = document.createElement('a');
-      link.download = `qr-${title.replace(/\s+/g, '-')}.png`;
-      link.href = url;
-      link.click();
+    const svg = document.querySelector('#qr-preview svg') as SVGElement;
+    if (svg) {
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      canvas.width = 200;
+      canvas.height = 200;
+      
+      img.onload = () => {
+        ctx?.drawImage(img, 0, 0);
+        const url = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `qr-${title.replace(/\s+/g, '-')}.png`;
+        link.href = url;
+        link.click();
+      };
+      
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
     }
   };
 

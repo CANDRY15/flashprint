@@ -25,8 +25,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -54,18 +53,7 @@ const Auth = () => {
         return;
       }
 
-      if (isSignUp) {
-        const { error } = await signUp(validationResult.data.email, validationResult.data.password);
-        if (!error) {
-          toast({
-            title: "Compte créé avec succès",
-            description: "Vous pouvez maintenant vous connecter",
-          });
-          setIsSignUp(false);
-        }
-      } else {
-        await signIn(validationResult.data.email, validationResult.data.password);
-      }
+      await signIn(validationResult.data.email, validationResult.data.password);
     } catch (error) {
       // Error is handled in AuthContext
     } finally {
@@ -89,12 +77,9 @@ const Auth = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{isSignUp ? "Créer un compte" : "Connexion Administrateur"}</CardTitle>
+            <CardTitle>Connexion Administrateur</CardTitle>
             <CardDescription>
-              {isSignUp 
-                ? "Créez un compte pour accéder à l'administration"
-                : "Entrez vos identifiants pour accéder à l'administration"
-              }
+              Entrez vos identifiants pour accéder à l'administration
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -130,25 +115,12 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isSignUp ? "Création..." : "Connexion..."}
+                    Connexion...
                   </>
                 ) : (
-                  isSignUp ? "Créer un compte" : "Se connecter"
+                  "Se connecter"
                 )}
               </Button>
-              <div className="text-center text-sm">
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-primary hover:underline"
-                  disabled={isLoading}
-                >
-                  {isSignUp 
-                    ? "Vous avez déjà un compte ? Connectez-vous"
-                    : "Pas de compte ? Créez-en un"
-                  }
-                </button>
-              </div>
             </form>
           </CardContent>
         </Card>

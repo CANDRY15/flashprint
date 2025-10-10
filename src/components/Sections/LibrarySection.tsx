@@ -1,109 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Download, QrCode, Search, GraduationCap, Calculator, Beaker, Scale } from "lucide-react";
+import { BookOpen, Download, QrCode, Search, Beaker } from "lucide-react";
 import libraryImage from "@/assets/digital-library.jpg";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Syllabus {
+  id: string;
+  title: string;
+  professor: string;
+  year: string;
+  file_size: string | null;
+  qr_code: string;
+  popular: boolean;
+  file_url: string | null;
+}
 
 const LibrarySection = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [medicineSyllabi, setMedicineSyllabi] = useState<Syllabus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const faculties = [
-    { id: "ingenieurs", name: "Ingénieurs", icon: Calculator, color: "bg-blue-100 text-blue-800" },
-    { id: "medecine", name: "Médecine", icon: Beaker, color: "bg-green-100 text-green-800" },
-    { id: "droit", name: "Droit", icon: Scale, color: "bg-purple-100 text-purple-800" },
-    { id: "sciences", name: "Sciences", icon: GraduationCap, color: "bg-orange-100 text-orange-800" },
+  const promotions = [
+    { id: "Bac1", name: "Bac1" },
+    { id: "Bac2", name: "Bac2" },
+    { id: "Bac3", name: "Bac3" },
+    { id: "Master1", name: "Master1" },
+    { id: "Master2", name: "Master2" },
+    { id: "Master3", name: "Master3" },
+    { id: "Master4", name: "Master4" },
   ];
 
-  const syllabus = {
-    ingenieurs: [
-      { 
-        title: "Mathématiques Appliquées I", 
-        professor: "Prof. Mukendi", 
-        year: "L1", 
-        size: "2.4 MB",
-        qrCode: "FP-ING-MA1-2024",
-        popular: true 
-      },
-      { 
-        title: "Programmation C++", 
-        professor: "Prof. Kabongo", 
-        year: "L2", 
-        size: "3.1 MB",
-        qrCode: "FP-ING-CPP-2024",
-        popular: false 
-      },
-      { 
-        title: "Résistance des Matériaux", 
-        professor: "Prof. Mwamba", 
-        year: "L3", 
-        size: "4.2 MB",
-        qrCode: "FP-ING-RDM-2024",
-        popular: false 
-      },
-    ],
-    medecine: [
-      { 
-        title: "Anatomie Générale", 
-        professor: "Dr. Kasongo", 
-        year: "L1", 
-        size: "5.8 MB",
-        qrCode: "FP-MED-ANAT-2024",
-        popular: true 
-      },
-      { 
-        title: "Physiologie Humaine", 
-        professor: "Dr. Mulamba", 
-        year: "L2", 
-        size: "4.1 MB",
-        qrCode: "FP-MED-PHYS-2024",
-        popular: false 
-      },
-    ],
-    droit: [
-      { 
-        title: "Droit Civil I", 
-        professor: "Me. Tshiswaka", 
-        year: "L1", 
-        size: "2.9 MB",
-        qrCode: "FP-DRT-CIV1-2024",
-        popular: true 
-      },
-      { 
-        title: "Droit Constitutionnel", 
-        professor: "Me. Kazadi", 
-        year: "L2", 
-        size: "3.5 MB",
-        qrCode: "FP-DRT-CONST-2024",
-        popular: false 
-      },
-    ],
-    sciences: [
-      { 
-        title: "Chimie Organique", 
-        professor: "Prof. Mputu", 
-        year: "L2", 
-        size: "3.7 MB",
-        qrCode: "FP-SCI-CHIM-2024",
-        popular: false 
-      },
-      { 
-        title: "Physique Quantique", 
-        professor: "Prof. Nkulu", 
-        year: "L3", 
-        size: "4.8 MB",
-        qrCode: "FP-SCI-PHYS-2024",
-        popular: true 
-      },
-    ],
+  useEffect(() => {
+    fetchMedicineSyllabi();
+  }, []);
+
+  const fetchMedicineSyllabi = async () => {
+    setIsLoading(true);
+    try {
+      // First get the Medicine faculty ID
+      const { data: faculty } = await supabase
+        .from('faculties')
+        .select('id')
+        .eq('slug', 'medecine')
+        .single();
+
+      if (faculty) {
+        // Fetch all syllabi for Medicine faculty
+        const { data, error } = await supabase
+          .from('syllabus')
+          .select('*')
+          .eq('faculty_id', faculty.id)
+          .order('year', { ascending: true })
+          .order('title', { ascending: true });
+
+        if (error) throw error;
+        setMedicineSyllabi(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching syllabi:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDownload = (title: string, qrCode: string) => {
-    // Simulation du téléchargement
-    const whatsappMessage = `Bonjour FlashPrint, je souhaite télécharger le syllabus "${title}" (Code: ${qrCode})`;
-    window.open(`https://wa.me/2430815050397?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+  const getSyllabiByPromotion = (promotion: string) => {
+    return medicineSyllabi.filter(
+      (item) =>
+        item.year === promotion &&
+        (searchTerm === "" ||
+          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.professor.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  };
+
+  const handleDownloadPDF = (fileUrl: string | null, title: string) => {
+    if (fileUrl) {
+      window.open(fileUrl, '_blank');
+    }
   };
 
   return (
@@ -181,76 +158,86 @@ const LibrarySection = () => {
           </div>
         </div>
 
-        {/* Faculty Tabs */}
-        <Tabs defaultValue="ingenieurs" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8">
-            {faculties.map((faculty) => {
-              const Icon = faculty.icon;
-              return (
-                <TabsTrigger key={faculty.id} value={faculty.id} className="flex items-center space-x-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{faculty.name}</span>
-                </TabsTrigger>
-              );
-            })}
+        {/* Medicine Faculty Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/20">
+            <Beaker className="h-5 w-5 text-green-700 dark:text-green-400" />
+            <h3 className="font-semibold text-green-700 dark:text-green-400">Faculté de Médecine</h3>
+          </div>
+        </div>
+
+        {/* Promotion Tabs */}
+        <Tabs defaultValue="Bac1" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-8">
+            {promotions.map((promotion) => (
+              <TabsTrigger key={promotion.id} value={promotion.id}>
+                {promotion.name}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          {faculties.map((faculty) => (
-            <TabsContent key={faculty.id} value={faculty.id}>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {syllabus[faculty.id as keyof typeof syllabus]
-                  .filter(item => 
-                    searchTerm === "" || 
-                    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.professor.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                  .map((item, index) => (
-                    <Card key={index} className="transition-smooth hover:shadow-brand">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg font-poppins line-clamp-2">{item.title}</CardTitle>
-                            <CardDescription className="mt-1">{item.professor} • {item.year}</CardDescription>
+          {promotions.map((promotion) => (
+            <TabsContent key={promotion.id} value={promotion.id}>
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Chargement...</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {getSyllabiByPromotion(promotion.id).length === 0 ? (
+                    <div className="col-span-full text-center py-12">
+                      <p className="text-muted-foreground">Aucun syllabus disponible pour cette promotion</p>
+                    </div>
+                  ) : (
+                    getSyllabiByPromotion(promotion.id).map((item) => (
+                      <Card key={item.id} className="transition-smooth hover:shadow-brand">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg font-poppins line-clamp-2">{item.title}</CardTitle>
+                              <CardDescription className="mt-1">{item.professor} • {item.year}</CardDescription>
+                            </div>
+                            {item.popular && (
+                              <Badge variant="secondary" className="ml-2">Populaire</Badge>
+                            )}
                           </div>
-                          {item.popular && (
-                            <Badge variant="secondary" className="ml-2">Populaire</Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                          <span className="flex items-center">
-                            <BookOpen className="h-4 w-4 mr-1" />
-                            {item.size}
-                          </span>
-                          <span className="flex items-center">
-                            <QrCode className="h-4 w-4 mr-1" />
-                            {item.qrCode}
-                          </span>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => handleDownload(item.title, item.qrCode)}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger
-                          </Button>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={() => handleDownload(item.title, item.qrCode)}
-                          >
-                            <QrCode className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                            <span className="flex items-center">
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              {item.file_size || 'N/A'}
+                            </span>
+                            <span className="flex items-center">
+                              <QrCode className="h-4 w-4 mr-1" />
+                              Code disponible
+                            </span>
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => handleDownloadPDF(item.file_url, item.title)}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Télécharger
+                            </Button>
+                            <Button 
+                              variant="default" 
+                              size="sm"
+                              onClick={() => handleDownloadPDF(item.file_url, item.title)}
+                            >
+                              <QrCode className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              )}
             </TabsContent>
           ))}
         </Tabs>
