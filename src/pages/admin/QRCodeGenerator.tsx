@@ -22,7 +22,7 @@ interface Faculty {
 const syllabusSchema = z.object({
   title: z.string().trim().min(3, "Le titre doit contenir au moins 3 caractères").max(200),
   professor: z.string().trim().min(2, "Le nom du professeur doit contenir au moins 2 caractères").max(100),
-  year: z.enum(["L1", "L2", "L3"], { errorMap: () => ({ message: "Année invalide" }) }),
+  year: z.enum(["Bac1", "Bac2", "Bac3", "Master1", "Master2", "Master3", "Master4"], { errorMap: () => ({ message: "Année invalide" }) }),
   facultyId: z.string().uuid("Veuillez sélectionner une faculté valide"),
   description: z.string().trim().max(500, "La description ne peut pas dépasser 500 caractères").optional(),
   companyName: z.string().trim().max(100).optional(),
@@ -161,8 +161,8 @@ const QRCodeGenerator = () => {
 
       if (insertError) throw insertError;
 
-      // Generate QR code URL - pointing directly to the PDF
-      const qrCode = publicUrl;
+      // Generate QR code URL pointing to syllabus details page
+      const qrCode = `${window.location.origin}/syllabus/${insertedData.id}`;
       
       // Update with QR code
       const { error: updateError } = await supabase
@@ -386,9 +386,13 @@ const QRCodeGenerator = () => {
                           <SelectValue placeholder="Sélectionner" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="L1">L1</SelectItem>
-                          <SelectItem value="L2">L2</SelectItem>
-                          <SelectItem value="L3">L3</SelectItem>
+                          <SelectItem value="Bac1">Bac1</SelectItem>
+                          <SelectItem value="Bac2">Bac2</SelectItem>
+                          <SelectItem value="Bac3">Bac3</SelectItem>
+                          <SelectItem value="Master1">Master1</SelectItem>
+                          <SelectItem value="Master2">Master2</SelectItem>
+                          <SelectItem value="Master3">Master3</SelectItem>
+                          <SelectItem value="Master4">Master4</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
