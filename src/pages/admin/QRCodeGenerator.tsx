@@ -161,8 +161,8 @@ const QRCodeGenerator = () => {
 
       if (insertError) throw insertError;
 
-      // Generate QR code URL pointing to syllabus details page
-      const qrCode = `${window.location.origin}/syllabus/${insertedData.id}`;
+      // Generate QR code URL pointing directly to the PDF
+      const qrCode = publicUrl;
       
       // Update with QR code
       const { error: updateError } = await supabase
