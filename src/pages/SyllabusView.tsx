@@ -67,13 +67,44 @@ const SyllabusView = () => {
     fetchSyllabus();
   }, [id, navigate, toast]);
 
-  const handleDownload = () => {
-    if (syllabus?.file_url) {
-      window.open(syllabus.file_url, '_blank');
-    } else {
+  const handleDownload = async () => {
+    if (!syllabus?.file_url) {
       toast({
         title: "Fichier non disponible",
         description: "Le fichier PDF n'est pas encore disponible pour ce syllabus.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Fetch the file
+      const response = await fetch(syllabus.file_url);
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${syllabus.title}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Téléchargement lancé",
+        description: "Le PDF est en cours de téléchargement.",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Erreur de téléchargement",
+        description: "Impossible de télécharger le fichier. Veuillez réessayer.",
         variant: "destructive",
       });
     }
@@ -166,6 +197,20 @@ const SyllabusView = () => {
                   </div>
                 </div>
               </div>
+
+              {/* PDF Preview */}
+              {syllabus.file_url && (
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold">Aperçu du syllabus</h3>
+                  <div className="w-full border rounded-lg overflow-hidden bg-muted/30">
+                    <iframe
+                      src={`${syllabus.file_url}#page=1&view=FitH`}
+                      className="w-full h-[600px]"
+                      title="Aperçu du PDF"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Description */}
               <div className="space-y-3">
