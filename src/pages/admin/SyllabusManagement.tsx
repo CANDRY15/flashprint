@@ -249,10 +249,28 @@ const SyllabusManagement = () => {
     }
   };
 
-  const handleDelete = async (id: string, syllabusTitle: string) => {
+  const handleDelete = async (id: string, syllabusTitle: string, fileUrl: string | null) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce syllabus ?")) return;
 
     try {
+      // Delete file from storage if it exists
+      if (fileUrl) {
+        try {
+          // Extract file path from URL
+          const urlParts = fileUrl.split('/syllabus/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1].split('?')[0]; // Remove query params
+            await supabase.storage
+              .from('syllabus')
+              .remove([filePath]);
+          }
+        } catch (storageError) {
+          console.error('Error deleting file from storage:', storageError);
+          // Continue with database deletion even if storage deletion fails
+        }
+      }
+
+      // Delete from database
       const { error } = await supabase
         .from('syllabus')
         .delete()
@@ -271,7 +289,7 @@ const SyllabusManagement = () => {
 
       toast({
         title: "Succès",
-        description: "Syllabus supprimé",
+        description: "Syllabus et fichier supprimés",
       });
 
       fetchSyllabus();
@@ -454,7 +472,7 @@ const SyllabusManagement = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(item.id, item.title)}
+                      onClick={() => handleDelete(item.id, item.title, item.file_url)}
                     >
                       Supprimer
                     </Button>

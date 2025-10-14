@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Download, QrCode, Search, Beaker } from "lucide-react";
+import { BookOpen, Download, QrCode, Search, Beaker, Eye } from "lucide-react";
 import libraryImage from "@/assets/digital-library.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface Syllabus {
   id: string;
@@ -20,6 +21,7 @@ interface Syllabus {
 }
 
 const LibrarySection = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [medicineSyllabi, setMedicineSyllabi] = useState<Syllabus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -219,15 +221,22 @@ const LibrarySection = () => {
                               variant="outline" 
                               size="sm" 
                               className="flex-1"
+                              onClick={() => navigate(`/syllabus/${item.id}`)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Détails
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
                               onClick={() => handleDownloadPDF(item.file_url, item.title)}
                             >
-                              <Download className="h-4 w-4 mr-2" />
-                              Télécharger
+                              <Download className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="default" 
                               size="sm"
-                              onClick={() => handleDownloadPDF(item.file_url, item.title)}
+                              onClick={() => navigate(`/syllabus/${item.id}`)}
                             >
                               <QrCode className="h-4 w-4" />
                             </Button>
