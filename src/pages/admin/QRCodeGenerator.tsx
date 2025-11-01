@@ -12,7 +12,6 @@ import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
-import qrLogo from "@/assets/qr-logo.png";
 
 interface Faculty {
   id: string;
@@ -573,12 +572,6 @@ const QRCodeGenerator = () => {
                           includeMargin
                           fgColor={primaryColor}
                           bgColor={secondaryColor}
-                          imageSettings={{
-                            src: qrLogo,
-                            height: 50,
-                            width: 50,
-                            excavate: true,
-                          }}
                         />
                       </div>
 
