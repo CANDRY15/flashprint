@@ -241,17 +241,11 @@ const SyllabusView = () => {
                     onClick={() => window.open(syllabus.file_url!, '_blank')}
                   >
                     <ExternalLink className="h-5 w-5 mr-2" />
-                    Ouvrir dans un nouvel onglet
+                    Voir
                   </Button>
                 )}
               </div>
 
-              {/* QR Code Info */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/10">
-                <p className="text-sm text-muted-foreground text-center">
-                  Code de référence : <span className="font-mono font-semibold text-foreground">{syllabus.qr_code}</span>
-                </p>
-              </div>
 
               {/* Call to Action */}
               <div className="mt-8 p-6 bg-muted/30 rounded-lg text-center space-y-3">
