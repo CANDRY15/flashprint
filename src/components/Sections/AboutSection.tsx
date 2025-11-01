@@ -58,9 +58,15 @@ const AboutSection = () => {
                   <h3 className="text-2xl font-bold font-poppins mb-4">Notre Histoire</h3>
                   <div className="prose prose-lg text-muted-foreground space-y-4">
                     <p>
-                      Tout a commencé en 2023, quand notre fondateur, étudiant à l'Université de Lubumbashi, 
+                      Tout a commencé en 2023, quand <strong>Chadrack Saidi Candry</strong>, étudiant en médecine 
+                      à la Faculté de Médecine de l'Université de Lubumbashi (Licence en Sciences Biomédicales), 
                       a réalisé les défis quotidiens auxquels font face ses camarades : accès limité aux syllabus, 
                       files d'attente interminables pour l'impression, et perte de documents importants.
+                    </p>
+                    <p>
+                      Passionné par la recherche clinique et l'innovation, avec plusieurs travaux publiés notamment 
+                      sur la pré-éclampsie et les infections sexuellement transmissibles, Chadrack a appliqué 
+                      sa rigueur scientifique à un problème concret : rendre l'éducation plus accessible.
                     </p>
                     <p>
                       L'idée révolutionnaire ? Intégrer la technologie QR Code aux services d'impression traditionnels. 
@@ -69,7 +75,8 @@ const AboutSection = () => {
                     </p>
                     <p>
                       Aujourd'hui, FlashPrint est devenu le partenaire de confiance de centaines d'étudiants 
-                      à Lubumbashi, transformant leur façon d'accéder et de gérer leurs documents académiques.
+                      à Lubumbashi, transformant leur façon d'accéder et de gérer leurs documents académiques. 
+                      Un projet créé par un étudiant, pour les étudiants.
                     </p>
                   </div>
                 </div>
