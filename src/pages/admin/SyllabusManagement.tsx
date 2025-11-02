@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Share2, Trash2 } from "lucide-react";
+import { Loader2, Plus, Share2, Trash2, Pencil, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +61,10 @@ const SyllabusManagement = () => {
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [selectedSyllabus, setSelectedSyllabus] = useState<Syllabus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingSyllabus, setEditingSyllabus] = useState<Syllabus | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterYear, setFilterYear] = useState<string>("all");
+  const [filterFaculty, setFilterFaculty] = useState<string>("all");
   
   // Form states
   const [title, setTitle] = useState("");
@@ -117,6 +121,34 @@ const SyllabusManagement = () => {
     return `${baseUrl}/syllabus/${syllabusId}`;
   };
 
+  const handleEdit = (syllabus: Syllabus) => {
+    setEditingSyllabus(syllabus);
+    setTitle(syllabus.title);
+    setProfessor(syllabus.professor);
+    setYear(syllabus.year);
+    setFacultyId(syllabus.faculty_id);
+    setPopular(syllabus.popular);
+    setFile(null);
+    setIsDialogOpen(true);
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setProfessor("");
+    setYear("");
+    setFacultyId("");
+    setPopular(false);
+    setFile(null);
+    setEditingSyllabus(null);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      resetForm();
+    }
+    setIsDialogOpen(open);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -165,10 +197,23 @@ const SyllabusManagement = () => {
         }
       }
 
-      let fileUrl = null;
-      let fileSize = null;
+      let fileUrl = editingSyllabus?.file_url || null;
+      let fileSize = editingSyllabus?.file_size || null;
 
       if (file) {
+        // Delete old file if exists
+        if (editingSyllabus?.file_url) {
+          try {
+            const urlParts = editingSyllabus.file_url.split('/syllabus/');
+            if (urlParts.length > 1) {
+              const filePath = urlParts[1].split('?')[0];
+              await supabase.storage.from('syllabus').remove([filePath]);
+            }
+          } catch (error) {
+            console.error('Error deleting old file:', error);
+          }
+        }
+
         const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         const fileName = `${Date.now()}-${sanitizedFileName}`;
         const { error: uploadError } = await supabase.storage
@@ -185,56 +230,82 @@ const SyllabusManagement = () => {
         fileSize = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
       }
 
-      // First insert the syllabus to get the ID
-      const { data: insertedData, error: insertError } = await supabase
-        .from('syllabus')
-        .insert({
-          title: validationResult.data.title,
-          professor: validationResult.data.professor,
-          year: validationResult.data.year,
-          faculty_id: validationResult.data.facultyId,
-          file_url: fileUrl,
-          file_size: fileSize,
-          qr_code: 'temporary', // Temporary value
-          popular: validationResult.data.popular,
-        })
-        .select()
-        .single();
+      if (editingSyllabus) {
+        // Update existing syllabus
+        const { error: updateError } = await supabase
+          .from('syllabus')
+          .update({
+            title: validationResult.data.title,
+            professor: validationResult.data.professor,
+            year: validationResult.data.year,
+            faculty_id: validationResult.data.facultyId,
+            file_url: fileUrl,
+            file_size: fileSize,
+            popular: validationResult.data.popular,
+          })
+          .eq('id', editingSyllabus.id);
 
-      if (insertError) throw insertError;
+        if (updateError) throw updateError;
 
-      // Generate QR code URL with the syllabus ID
-      const qrCode = generateQrCode(insertedData.id);
-      
-      // Update the syllabus with the actual QR code
-      const { error: updateError } = await supabase
-        .from('syllabus')
-        .update({ qr_code: qrCode })
-        .eq('id', insertedData.id);
+        await supabase.rpc('log_admin_action', {
+          _action: 'update_syllabus',
+          _details: { 
+            syllabus_id: editingSyllabus.id,
+            title: validationResult.data.title
+          }
+        });
 
-      if (updateError) throw updateError;
+        toast({
+          title: "Succès",
+          description: "Syllabus mis à jour avec succès",
+        });
+      } else {
+        // First insert the syllabus to get the ID
+        const { data: insertedData, error: insertError } = await supabase
+          .from('syllabus')
+          .insert({
+            title: validationResult.data.title,
+            professor: validationResult.data.professor,
+            year: validationResult.data.year,
+            faculty_id: validationResult.data.facultyId,
+            file_url: fileUrl,
+            file_size: fileSize,
+            qr_code: 'temporary', // Temporary value
+            popular: validationResult.data.popular,
+          })
+          .select()
+          .single();
 
-      // Log admin action
-      await supabase.rpc('log_admin_action', {
-        _action: 'create_syllabus',
-        _details: { 
-          title: validationResult.data.title,
-          qr_code: qrCode 
-        }
-      });
+        if (insertError) throw insertError;
 
-      toast({
-        title: "Succès",
-        description: "Syllabus ajouté avec succès",
-      });
+        // Generate QR code URL with the syllabus ID
+        const qrCode = generateQrCode(insertedData.id);
+        
+        // Update the syllabus with the actual QR code
+        const { error: updateError } = await supabase
+          .from('syllabus')
+          .update({ qr_code: qrCode })
+          .eq('id', insertedData.id);
+
+        if (updateError) throw updateError;
+
+        // Log admin action
+        await supabase.rpc('log_admin_action', {
+          _action: 'create_syllabus',
+          _details: { 
+            title: validationResult.data.title,
+            qr_code: qrCode 
+          }
+        });
+
+        toast({
+          title: "Succès",
+          description: "Syllabus ajouté avec succès",
+        });
+      }
 
       // Reset form
-      setTitle("");
-      setProfessor("");
-      setYear("");
-      setFacultyId("");
-      setPopular(false);
-      setFile(null);
+      resetForm();
       setIsDialogOpen(false);
       
       fetchSyllabus();
@@ -332,6 +403,15 @@ const SyllabusManagement = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  const filteredSyllabus = syllabusList.filter((item) => {
+    const matchesSearch = 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.professor.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesYear = filterYear === "all" || item.year === filterYear;
+    const matchesFaculty = filterFaculty === "all" || item.faculty_id === filterFaculty;
+    return matchesSearch && matchesYear && matchesFaculty;
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -341,8 +421,9 @@ const SyllabusManagement = () => {
         </div>
       </div>
 
-      <div className="mb-6">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <div className="space-y-4 mb-6">
+        <div className="flex gap-4">
+          <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -351,9 +432,13 @@ const SyllabusManagement = () => {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Nouveau syllabus</DialogTitle>
+                <DialogTitle>
+                  {editingSyllabus ? "Modifier le syllabus" : "Nouveau syllabus"}
+                </DialogTitle>
                 <DialogDescription>
-                  Ajoutez un nouveau syllabus à la bibliothèque
+                  {editingSyllabus 
+                    ? "Modifiez les informations du syllabus" 
+                    : "Ajoutez un nouveau syllabus à la bibliothèque"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -430,10 +515,10 @@ const SyllabusManagement = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Ajout en cours...
+                      {editingSyllabus ? "Mise à jour..." : "Ajout en cours..."}
                     </>
                   ) : (
-                    "Ajouter"
+                    editingSyllabus ? "Mettre à jour" : "Ajouter"
                   )}
                 </Button>
               </form>
@@ -441,8 +526,51 @@ const SyllabusManagement = () => {
           </Dialog>
         </div>
 
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un syllabus..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          
+          <Select value={filterYear} onValueChange={setFilterYear}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrer par année" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les années</SelectItem>
+              <SelectItem value="Bac1">Bac1</SelectItem>
+              <SelectItem value="Bac2">Bac2</SelectItem>
+              <SelectItem value="Bac3">Bac3</SelectItem>
+              <SelectItem value="Master1">Master1</SelectItem>
+              <SelectItem value="Master2">Master2</SelectItem>
+              <SelectItem value="Master3">Master3</SelectItem>
+              <SelectItem value="Master4">Master4</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterFaculty} onValueChange={setFilterFaculty}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrer par faculté" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les facultés</SelectItem>
+              {faculties.map((faculty) => (
+                <SelectItem key={faculty.id} value={faculty.id}>
+                  {faculty.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {syllabusList.map((item) => (
+          {filteredSyllabus.map((item) => (
             <Card key={item.id}>
               <CardHeader>
                 <CardTitle className="text-lg">{item.title}</CardTitle>
@@ -464,17 +592,25 @@ const SyllabusManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleEdit(item)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleShareQr(item)}
                       className="flex-1"
                     >
-                      Partager QR
+                      <Share2 className="h-4 w-4 mr-2" />
+                      QR
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(item.id, item.title, item.file_url)}
                     >
-                      Supprimer
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
