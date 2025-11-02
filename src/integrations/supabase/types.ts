@@ -104,6 +104,36 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          content_type: string | null
+          created_at: string | null
+          id: string
+          key: string
+          section: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          key: string
+          section: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          key?: string
+          section?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       syllabus: {
         Row: {
           created_at: string | null

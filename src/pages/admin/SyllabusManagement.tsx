@@ -327,13 +327,21 @@ const SyllabusManagement = () => {
       // Delete file from storage if it exists
       if (fileUrl) {
         try {
-          // Extract file path from URL
-          const urlParts = fileUrl.split('/syllabus/');
-          if (urlParts.length > 1) {
-            const filePath = urlParts[1].split('?')[0]; // Remove query params
-            await supabase.storage
+          // Extract filename from full URL
+          // URL format: https://...supabase.co/storage/v1/object/public/syllabus/filename.pdf
+          const fileName = fileUrl.split('/syllabus/').pop()?.split('?')[0];
+          
+          if (fileName) {
+            console.log('Deleting file:', fileName);
+            const { error: storageError } = await supabase.storage
               .from('syllabus')
-              .remove([filePath]);
+              .remove([fileName]);
+            
+            if (storageError) {
+              console.error('Storage deletion error:', storageError);
+            } else {
+              console.log('File deleted successfully from storage');
+            }
           }
         } catch (storageError) {
           console.error('Error deleting file from storage:', storageError);
@@ -349,14 +357,19 @@ const SyllabusManagement = () => {
 
       if (error) throw error;
 
-      // Log admin action
-      await supabase.rpc('log_admin_action', {
-        _action: 'delete_syllabus',
-        _details: { 
-          syllabus_id: id,
-          title: syllabusTitle
-        }
-      });
+      // Log admin action - wrapped in try-catch to not fail if it errors
+      try {
+        await supabase.rpc('log_admin_action', {
+          _action: 'delete_syllabus',
+          _details: { 
+            syllabus_id: id,
+            title: syllabusTitle
+          }
+        });
+      } catch (logError) {
+        console.error('Error logging admin action:', logError);
+        // Continue even if logging fails
+      }
 
       toast({
         title: "Succès",

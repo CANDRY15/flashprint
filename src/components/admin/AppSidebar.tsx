@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, LogOut, User, QrCode, Building2 } from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, User, QrCode, Building2, FileEdit } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,6 +19,7 @@ const items = [
   { title: "Générateur QR", url: "/admin/qr-generator", icon: QrCode },
   { title: "Liste Syllabus", url: "/admin/syllabus", icon: FileText },
   { title: "Facultés", url: "/admin/faculties", icon: Building2 },
+  { title: "Contenus du Site", url: "/admin/content", icon: FileEdit },
 ];
 
 export function AppSidebar() {
