@@ -36,6 +36,8 @@ const Header = () => {
               src={flashprintLogo} 
               alt="FlashPrint" 
               className="h-10 w-auto"
+              width={48}
+              height={40}
             />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold font-poppins">FlashPrint</h1>

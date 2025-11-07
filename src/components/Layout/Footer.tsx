@@ -50,6 +50,8 @@ const Footer = () => {
                 src={flashprintLogo} 
                 alt="FlashPrint" 
                 className="h-12 w-auto"
+                width={58}
+                height={48}
               />
               <div>
                 <h3 className="text-xl font-bold font-poppins">FlashPrint</h3>

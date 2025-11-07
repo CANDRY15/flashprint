@@ -134,6 +134,8 @@ const ServicesSection = () => {
               src={servicesImage} 
               alt="Services d'impression FlashPrint"
               className="rounded-2xl shadow-brand w-full h-auto"
+              width={628}
+              height={471}
             />
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/20 to-accent/20"></div>
           </div>

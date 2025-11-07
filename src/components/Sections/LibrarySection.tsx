@@ -142,6 +142,8 @@ const LibrarySection = () => {
               src={libraryImage} 
               alt="Bibliothèque numérique FlashPrint"
               className="rounded-2xl shadow-brand w-full h-auto"
+              width={628}
+              height={471}
             />
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10"></div>
           </div>
