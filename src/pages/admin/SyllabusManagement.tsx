@@ -51,7 +51,16 @@ const syllabusSchema = z.object({
 });
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_FILE_TYPES = ['application/pdf'];
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPTX
+  'application/vnd.ms-powerpoint', // PPT
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+  'application/msword', // DOC
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+  'application/vnd.ms-excel', // XLS
+  'text/plain', // TXT
+];
 
 const SyllabusManagement = () => {
   const { user } = useAuth();
@@ -179,7 +188,7 @@ const SyllabusManagement = () => {
         if (!ALLOWED_FILE_TYPES.includes(file.type)) {
           toast({
             title: "Type de fichier invalide",
-            description: "Seuls les fichiers PDF sont acceptés",
+            description: "Fichiers acceptés : PDF, PPTX, PPT, DOCX, DOC, XLSX, XLS, TXT",
             variant: "destructive",
           });
           setIsSubmitting(false);
@@ -508,11 +517,11 @@ const SyllabusManagement = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="file">Fichier PDF (optionnel)</Label>
+                  <Label htmlFor="file">Fichier (PDF, PPTX, DOCX, etc.) - Optionnel</Label>
                   <Input
                     id="file"
                     type="file"
-                    accept=".pdf"
+                    accept=".pdf,.pptx,.ppt,.docx,.doc,.xlsx,.xls,.txt"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                   />
                 </div>

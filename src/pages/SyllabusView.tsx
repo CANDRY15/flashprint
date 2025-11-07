@@ -71,34 +71,39 @@ const SyllabusView = () => {
     if (!syllabus?.file_url) {
       toast({
         title: "Fichier non disponible",
-        description: "Le fichier PDF n'est pas encore disponible pour ce syllabus.",
+        description: "Le fichier n'est pas encore disponible pour ce syllabus.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      // Extract file extension from URL
+      const url = new URL(syllabus.file_url);
+      const pathParts = url.pathname.split('.');
+      const extension = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
+      
       // Fetch the file
       const response = await fetch(syllabus.file_url);
       const blob = await response.blob();
       
       // Create a temporary URL for the blob
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       
       // Create a temporary link and trigger download
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `${syllabus.title}.pdf`;
+      link.href = blobUrl;
+      link.download = extension ? `${syllabus.title}.${extension}` : `${syllabus.title}`;
       document.body.appendChild(link);
       link.click();
       
       // Cleanup
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       
       toast({
         title: "Téléchargement lancé",
-        description: "Le PDF est en cours de téléchargement.",
+        description: "Le fichier est en cours de téléchargement.",
       });
     } catch (error) {
       console.error('Download error:', error);
@@ -108,6 +113,28 @@ const SyllabusView = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Helper function to check if file is PDF
+  const isPdfFile = (fileUrl: string | null) => {
+    if (!fileUrl) return false;
+    const url = fileUrl.toLowerCase();
+    return url.endsWith('.pdf') || url.includes('.pdf?');
+  };
+
+  // Helper function to get file type label
+  const getFileTypeLabel = (fileUrl: string | null) => {
+    if (!fileUrl) return "Document";
+    const url = fileUrl.toLowerCase();
+    if (url.endsWith('.pdf') || url.includes('.pdf?')) return "PDF";
+    if (url.endsWith('.pptx') || url.includes('.pptx?')) return "PowerPoint";
+    if (url.endsWith('.ppt') || url.includes('.ppt?')) return "PowerPoint";
+    if (url.endsWith('.docx') || url.includes('.docx?')) return "Word";
+    if (url.endsWith('.doc') || url.includes('.doc?')) return "Word";
+    if (url.endsWith('.xlsx') || url.includes('.xlsx?')) return "Excel";
+    if (url.endsWith('.xls') || url.includes('.xls?')) return "Excel";
+    if (url.endsWith('.txt') || url.includes('.txt?')) return "Texte";
+    return "Document";
   };
 
   if (isLoading) {
@@ -198,17 +225,38 @@ const SyllabusView = () => {
                 </div>
               </div>
 
-              {/* PDF Preview */}
+              {/* Document Preview or Info */}
               {syllabus.file_url && (
                 <div className="space-y-3">
-                  <h3 className="text-xl font-semibold">Aperçu du syllabus</h3>
-                  <div className="w-full border rounded-lg overflow-hidden bg-muted/30">
-                    <iframe
-                      src={`${syllabus.file_url}#page=1&view=FitH`}
-                      className="w-full h-[600px]"
-                      title="Aperçu du PDF"
-                    />
-                  </div>
+                  <h3 className="text-xl font-semibold">Aperçu du document</h3>
+                  {isPdfFile(syllabus.file_url) ? (
+                    <div className="w-full border rounded-lg overflow-hidden bg-muted/30">
+                      <iframe
+                        src={`${syllabus.file_url}#page=1&view=FitH`}
+                        className="w-full h-[600px]"
+                        title="Aperçu du document"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full border rounded-lg p-8 bg-muted/30 text-center space-y-4">
+                      <div className="flex-shrink-0 w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                        <BookOpen className="h-8 w-8 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold mb-2">
+                          Fichier {getFileTypeLabel(syllabus.file_url)} disponible
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          L'aperçu n'est pas disponible pour ce type de fichier. 
+                          Téléchargez le fichier pour le consulter.
+                        </p>
+                      </div>
+                      <Button onClick={handleDownload} size="lg">
+                        <Download className="h-5 w-5 mr-2" />
+                        Télécharger maintenant
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -231,7 +279,7 @@ const SyllabusView = () => {
                   disabled={!syllabus.file_url}
                 >
                   <Download className="h-5 w-5 mr-2" />
-                  Télécharger le PDF
+                  Télécharger le fichier
                 </Button>
 
                 {syllabus.file_url && (
