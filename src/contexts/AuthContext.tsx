@@ -57,16 +57,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      // Just check if admin - the trigger creates the profile automatically
-      const { data } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', userId)
-        .maybeSingle();
+      // Check admin role from user_roles table using has_role function
+      const { data, error } = await supabase
+        .rpc('has_role', { 
+          _user_id: userId, 
+          _role: 'admin' 
+        });
       
-      setIsAdmin(data?.is_admin || false);
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
+      
+      setIsAdmin(data || false);
     } catch (error) {
-      // Ignore errors, just set to false
+      console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
     }
   };

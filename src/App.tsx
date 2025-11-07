@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -27,13 +28,17 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="syllabus" element={<SyllabusManagement />} />
-            <Route path="qr-generator" element={<QRCodeGenerator />} />
-            <Route path="faculties" element={<FacultyManagement />} />
-            <Route path="content" element={<ContentManagement />} />
-          </Route>
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="syllabus" element={<SyllabusManagement />} />
+              <Route path="qr-generator" element={<QRCodeGenerator />} />
+              <Route path="faculties" element={<FacultyManagement />} />
+              <Route path="content" element={<ContentManagement />} />
+            </Route>
             <Route path="/syllabus/:id" element={<SyllabusView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
