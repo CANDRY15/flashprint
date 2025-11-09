@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 interface Syllabus {
   id: string;
+  slug: string | null;
   title: string;
   professor: string;
   year: string;
@@ -223,7 +224,7 @@ const LibrarySection = () => {
                               variant="outline" 
                               size="sm" 
                               className="flex-1"
-                              onClick={() => navigate(`/syllabus/${item.id}`)}
+                              onClick={() => navigate(`/syllabus/${item.slug || item.id}`)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               Détails
@@ -238,7 +239,7 @@ const LibrarySection = () => {
                             <Button 
                               variant="default" 
                               size="sm"
-                              onClick={() => navigate(`/syllabus/${item.id}`)}
+                              onClick={() => navigate(`/syllabus/${item.slug || item.id}`)}
                             >
                               <QrCode className="h-4 w-4" />
                             </Button>

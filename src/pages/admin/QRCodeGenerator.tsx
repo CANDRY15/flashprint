@@ -161,13 +161,23 @@ const QRCodeGenerator = () => {
 
       if (insertError) throw insertError;
 
-      // Generate QR code URL pointing directly to the PDF
-      const qrCode = publicUrl;
+      // Generate slug using the database function
+      const { data: slugData, error: slugError } = await supabase
+        .rpc('generate_slug', { title: validationResult.data.title });
+
+      if (slugError) throw slugError;
+
+      // Generate QR code URL pointing to the syllabus page (using slug if available)
+      const baseUrl = window.location.origin;
+      const qrCode = `${baseUrl}/syllabus/${slugData || insertedData.id}`;
       
-      // Update with QR code
+      // Update with slug and QR code
       const { error: updateError } = await supabase
         .from('syllabus')
-        .update({ qr_code: qrCode })
+        .update({ 
+          slug: slugData,
+          qr_code: qrCode 
+        })
         .eq('id', insertedData.id);
 
       if (updateError) throw updateError;

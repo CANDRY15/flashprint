@@ -14,6 +14,7 @@ import InterstitialAd from "@/components/InterstitialAd";
 
 interface SyllabusData {
   id: string;
+  slug: string | null;
   title: string;
   professor: string;
   year: string;
@@ -28,7 +29,7 @@ interface SyllabusData {
 }
 
 const SyllabusView = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slugOrId } = useParams<{ slugOrId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [syllabus, setSyllabus] = useState<SyllabusData | null>(null);
@@ -38,21 +39,33 @@ const SyllabusView = () => {
 
   useEffect(() => {
     const fetchSyllabus = async () => {
-      if (!id) {
+      if (!slugOrId) {
         toast({
           title: "Erreur",
-          description: "ID du syllabus manquant",
+          description: "Identifiant du syllabus manquant",
           variant: "destructive",
         });
         navigate("/");
         return;
       }
 
-      const { data, error } = await supabase
+      // Try to fetch by slug first
+      let { data, error } = await supabase
         .from('syllabus')
         .select('*, faculties(name)')
-        .eq('id', id)
+        .eq('slug', slugOrId)
         .maybeSingle();
+
+      // If not found by slug, try by ID
+      if (!data && !error) {
+        const result = await supabase
+          .from('syllabus')
+          .select('*, faculties(name)')
+          .eq('id', slugOrId)
+          .maybeSingle();
+        data = result.data;
+        error = result.error;
+      }
 
       if (error || !data) {
         toast({
@@ -76,10 +89,15 @@ const SyllabusView = () => {
     };
 
     fetchSyllabus();
-  }, [id, navigate, toast]);
+  }, [slugOrId, navigate, toast]);
+
+  const getProxiedFileUrl = (slugOrId: string) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    return `${supabaseUrl}/functions/v1/syllabus-file/${slugOrId}`;
+  };
 
   const handleDownload = async () => {
-    if (!syllabus?.file_url) {
+    if (!syllabus?.id) {
       toast({
         title: "Fichier non disponible",
         description: "Le fichier n'est pas encore disponible pour ce syllabus.",
@@ -89,14 +107,28 @@ const SyllabusView = () => {
     }
 
     try {
-      // Extract file extension from URL
-      const url = new URL(syllabus.file_url);
-      const pathParts = url.pathname.split('.');
-      const extension = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
+      const proxyUrl = getProxiedFileUrl(syllabus.slug || syllabus.id);
       
-      // Fetch the file
-      const response = await fetch(syllabus.file_url);
+      // Fetch the file through proxy
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      
       const blob = await response.blob();
+      
+      // Extract file extension from content-type or original URL
+      let extension = '';
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('pdf')) extension = 'pdf';
+      else if (contentType?.includes('powerpoint') || contentType?.includes('presentation')) extension = 'pptx';
+      else if (contentType?.includes('word') || contentType?.includes('document')) extension = 'docx';
+      else if (syllabus.file_url) {
+        const url = new URL(syllabus.file_url);
+        const pathParts = url.pathname.split('.');
+        extension = pathParts.length > 1 ? pathParts[pathParts.length - 1] : '';
+      }
       
       // Create a temporary URL for the blob
       const blobUrl = window.URL.createObjectURL(blob);
@@ -156,8 +188,9 @@ const SyllabusView = () => {
   const handleAdClose = () => {
     setShowInterstitialAd(false);
     
-    if (pendingAction === "view" && syllabus?.file_url) {
-      window.open(syllabus.file_url, '_blank');
+    if (pendingAction === "view" && syllabus?.id) {
+      const proxyUrl = getProxiedFileUrl(syllabus.slug || syllabus.id);
+      window.open(proxyUrl, '_blank');
     }
     
     setPendingAction(null);
@@ -263,7 +296,7 @@ const SyllabusView = () => {
                   {isPdfFile(syllabus.file_url) ? (
                     <div className="w-full border rounded-lg overflow-hidden bg-muted/30">
                       <iframe
-                        src={`${syllabus.file_url}#page=1&view=FitH`}
+                        src={`${getProxiedFileUrl(syllabus.slug || syllabus.id)}#page=1&view=FitH`}
                         className="w-full h-[600px]"
                         title="Aperçu du document"
                       />

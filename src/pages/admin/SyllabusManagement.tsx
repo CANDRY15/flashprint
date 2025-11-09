@@ -124,10 +124,10 @@ const SyllabusManagement = () => {
     setSyllabusList(data || []);
   };
 
-  const generateQrCode = (syllabusId: string) => {
-    // Generate URL that points to the syllabus view page
+  const generateQrCode = (syllabusId: string, syllabusSlug: string | null = null) => {
+    // Generate URL that points to the syllabus view page using slug if available
     const baseUrl = window.location.origin;
-    return `${baseUrl}/syllabus/${syllabusId}`;
+    return `${baseUrl}/syllabus/${syllabusSlug || syllabusId}`;
   };
 
   const handleEdit = (syllabus: Syllabus) => {
@@ -269,7 +269,7 @@ const SyllabusManagement = () => {
           description: "Syllabus mis à jour avec succès",
         });
       } else {
-        // First insert the syllabus to get the ID
+        // First insert the syllabus to get the ID and generate slug
         const { data: insertedData, error: insertError } = await supabase
           .from('syllabus')
           .insert({
@@ -287,13 +287,22 @@ const SyllabusManagement = () => {
 
         if (insertError) throw insertError;
 
-        // Generate QR code URL with the syllabus ID
-        const qrCode = generateQrCode(insertedData.id);
+        // Generate slug using the database function
+        const { data: slugData, error: slugError } = await supabase
+          .rpc('generate_slug', { title: validationResult.data.title });
+
+        if (slugError) throw slugError;
+
+        // Generate QR code URL with the slug
+        const qrCode = generateQrCode(insertedData.id, slugData);
         
-        // Update the syllabus with the actual QR code
+        // Update the syllabus with the slug and actual QR code
         const { error: updateError } = await supabase
           .from('syllabus')
-          .update({ qr_code: qrCode })
+          .update({ 
+            slug: slugData,
+            qr_code: qrCode 
+          })
           .eq('id', insertedData.id);
 
         if (updateError) throw updateError;

@@ -144,6 +144,7 @@ export type Database = {
           popular: boolean | null
           professor: string
           qr_code: string
+          slug: string | null
           title: string
           updated_at: string | null
           year: string
@@ -157,6 +158,7 @@ export type Database = {
           popular?: boolean | null
           professor: string
           qr_code: string
+          slug?: string | null
           title: string
           updated_at?: string | null
           year: string
@@ -170,6 +172,7 @@ export type Database = {
           popular?: boolean | null
           professor?: string
           qr_code?: string
+          slug?: string | null
           title?: string
           updated_at?: string | null
           year?: string
@@ -210,6 +213,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_slug: { Args: { title: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

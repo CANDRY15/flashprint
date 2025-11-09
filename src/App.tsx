@@ -39,7 +39,7 @@ const App = () => (
               <Route path="faculties" element={<FacultyManagement />} />
               <Route path="content" element={<ContentManagement />} />
             </Route>
-            <Route path="/syllabus/:id" element={<SyllabusView />} />
+            <Route path="/syllabus/:slugOrId" element={<SyllabusView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
