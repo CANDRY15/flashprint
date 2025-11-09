@@ -7,6 +7,27 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const facultySchema = z.object({
+  name: z.string()
+    .trim()
+    .min(3, "Le nom doit contenir au moins 3 caractères")
+    .max(100, "Le nom est trop long (max 100 caractères)")
+    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Le nom contient des caractères invalides"),
+  slug: z.string()
+    .min(3, "Le slug doit contenir au moins 3 caractères")
+    .max(100, "Le slug est trop long (max 100 caractères)")
+    .regex(/^[a-z0-9-]+$/, "Le slug doit contenir uniquement des lettres minuscules, chiffres et tirets"),
+  icon: z.string()
+    .max(50, "Le nom de l'icône est trop long")
+    .optional()
+    .or(z.literal("")),
+  color: z.string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Code couleur invalide (format: #RRGGBB)")
+    .optional()
+    .or(z.literal("")),
+});
 
 interface Faculty {
   id: string;
@@ -70,10 +91,18 @@ export default function FacultyManagement() {
     setIsSubmitting(true);
 
     try {
-      if (!name.trim()) {
+      // Validate input
+      const validation = facultySchema.safeParse({
+        name: name.trim(),
+        slug: slug || generateSlug(name),
+        icon: icon || "",
+        color: color || "",
+      });
+
+      if (!validation.success) {
         toast({
-          title: "Erreur",
-          description: "Le nom de la faculté est requis",
+          title: "Erreur de validation",
+          description: validation.error.errors[0].message,
           variant: "destructive",
         });
         setIsSubmitting(false);

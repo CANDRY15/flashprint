@@ -8,6 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Save } from "lucide-react";
+import { z } from "zod";
+
+const contentSchema = z.object({
+  value: z.string()
+    .min(1, "Le contenu ne peut pas être vide")
+    .max(5000, "Le contenu est trop long (max 5000 caractères)"),
+});
 
 interface ContentItem {
   id: string;
@@ -58,6 +65,18 @@ const ContentManagement = () => {
   const handleSave = async (item: ContentItem) => {
     setIsSaving(true);
     const newValue = editedContents[item.id] !== undefined ? editedContents[item.id] : item.value;
+    
+    // Validate input
+    const validation = contentSchema.safeParse({ value: newValue });
+    if (!validation.success) {
+      toast({
+        title: "Erreur de validation",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
     
     const { error } = await supabase
       .from('site_content')

@@ -16,6 +16,27 @@ import {
   Instagram,
   Facebook
 } from "lucide-react";
+import { z } from "zod";
+
+const contactSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(2, "Le nom doit contenir au moins 2 caractères")
+    .max(100, "Le nom est trop long (max 100 caractères)"),
+  email: z.string()
+    .email("Email invalide")
+    .max(255, "L'email est trop long")
+    .optional()
+    .or(z.literal("")),
+  phone: z.string()
+    .regex(/^\+?[0-9\s-]{8,20}$/, "Numéro de téléphone invalide")
+    .optional()
+    .or(z.literal("")),
+  message: z.string()
+    .trim()
+    .min(10, "Le message doit contenir au moins 10 caractères")
+    .max(2000, "Le message est trop long (max 2000 caractères)"),
+});
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -66,24 +87,25 @@ const ContactSection = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation basique
-    if (!formData.name || !formData.message) {
+    // Validate input
+    const validation = contactSchema.safeParse(formData);
+    if (!validation.success) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir au minimum votre nom et votre message.",
+        title: "Erreur de validation",
+        description: validation.error.errors[0].message,
         variant: "destructive",
       });
       return;
     }
 
-    // Créer le message WhatsApp
+    // Créer le message WhatsApp avec données validées
     const whatsappMessage = `Bonjour FlashPrint,
 
-Nom: ${formData.name}
-${formData.email ? `Email: ${formData.email}` : ''}
-${formData.phone ? `Téléphone: ${formData.phone}` : ''}
+Nom: ${validation.data.name}
+${validation.data.email ? `Email: ${validation.data.email}` : ''}
+${validation.data.phone ? `Téléphone: ${validation.data.phone}` : ''}
 
-Message: ${formData.message}`;
+Message: ${validation.data.message}`;
 
     // Rediriger vers WhatsApp
     window.open(`https://wa.me/2430815050397?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
