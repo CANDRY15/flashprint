@@ -9,6 +9,7 @@ import { Download, BookOpen, Calendar, User, ArrowLeft, ExternalLink } from "luc
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
+import AdSense from "@/components/AdSense";
 
 interface SyllabusData {
   id: string;
@@ -225,6 +226,11 @@ const SyllabusView = () => {
                 </div>
               </div>
 
+              {/* AdSense - Top Banner */}
+              <div className="my-6">
+                <AdSense slot="3456789012" format="horizontal" />
+              </div>
+
               {/* Document Preview or Info */}
               {syllabus.file_url && (
                 <div className="space-y-3">
@@ -268,6 +274,11 @@ const SyllabusView = () => {
                   à tout moment, même si vous perdez votre version papier. Vous pouvez le télécharger
                   gratuitement et le consulter sur tous vos appareils.
                 </p>
+              </div>
+
+              {/* AdSense - Mid Content Rectangle */}
+              <div className="my-6">
+                <AdSense slot="4567890123" format="rectangle" />
               </div>
 
               {/* Actions */}
