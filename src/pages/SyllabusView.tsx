@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import AdSense from "@/components/AdSense";
+import InterstitialAd from "@/components/InterstitialAd";
 
 interface SyllabusData {
   id: string;
@@ -32,6 +33,8 @@ const SyllabusView = () => {
   const { toast } = useToast();
   const [syllabus, setSyllabus] = useState<SyllabusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showInterstitialAd, setShowInterstitialAd] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"view" | null>(null);
 
   useEffect(() => {
     const fetchSyllabus = async () => {
@@ -63,6 +66,13 @@ const SyllabusView = () => {
 
       setSyllabus(data as SyllabusData);
       setIsLoading(false);
+
+      // Show interstitial ad after 3 seconds for QR code visitors
+      const timer = setTimeout(() => {
+        setShowInterstitialAd(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
     };
 
     fetchSyllabus();
@@ -136,6 +146,21 @@ const SyllabusView = () => {
     if (url.endsWith('.xls') || url.includes('.xls?')) return "Excel";
     if (url.endsWith('.txt') || url.includes('.txt?')) return "Texte";
     return "Document";
+  };
+
+  const handleViewClick = () => {
+    setPendingAction("view");
+    setShowInterstitialAd(true);
+  };
+
+  const handleAdClose = () => {
+    setShowInterstitialAd(false);
+    
+    if (pendingAction === "view" && syllabus?.file_url) {
+      window.open(syllabus.file_url, '_blank');
+    }
+    
+    setPendingAction(null);
   };
 
   if (isLoading) {
@@ -297,7 +322,7 @@ const SyllabusView = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => window.open(syllabus.file_url!, '_blank')}
+                    onClick={handleViewClick}
                   >
                     <ExternalLink className="h-5 w-5 mr-2" />
                     Voir
@@ -327,6 +352,14 @@ const SyllabusView = () => {
         </div>
       </div>
       <Footer />
+
+      {/* Interstitial Ad Dialog */}
+      <InterstitialAd
+        isOpen={showInterstitialAd}
+        onClose={handleAdClose}
+        adSlot="5678901234"
+        autoCloseDelay={5}
+      />
     </>
   );
 };
