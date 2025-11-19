@@ -127,7 +127,7 @@ const SyllabusManagement = () => {
   const generateQrCode = (syllabusId: string, syllabusSlug: string | null = null) => {
     // Generate URL that points to the syllabus view page using slug if available
     const baseUrl = window.location.origin;
-    return `${baseUrl}/syllabus/${syllabusSlug || syllabusId}`;
+    return `${baseUrl}/syllabus/${syllabusSlug || syllabusId}?qr=1`;
   };
 
   const handleEdit = (syllabus: Syllabus) => {

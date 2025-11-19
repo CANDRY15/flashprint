@@ -169,7 +169,7 @@ const QRCodeGenerator = () => {
 
       // Generate QR code URL pointing to the syllabus page (using slug if available)
       const baseUrl = window.location.origin;
-      const qrCode = `${baseUrl}/syllabus/${slugData || insertedData.id}`;
+      const qrCode = `${baseUrl}/syllabus/${slugData || insertedData.id}?qr=1`;
       
       // Update with slug and QR code
       const { error: updateError } = await supabase

@@ -80,6 +80,14 @@ const SyllabusView = () => {
       setSyllabus(data as SyllabusData);
       setIsLoading(false);
 
+      // Track view event
+      const isFromQR = window.location.search.includes('qr=1');
+      supabase.from('syllabus_analytics').insert({
+        syllabus_id: data.id,
+        event_type: isFromQR ? 'qr_scan' : 'view',
+        user_agent: navigator.userAgent,
+      });
+
       // Show interstitial ad after 3 seconds for QR code visitors
       const timer = setTimeout(() => {
         setShowInterstitialAd(true);
@@ -107,6 +115,13 @@ const SyllabusView = () => {
     }
 
     try {
+      // Track download event
+      await supabase.from('syllabus_analytics').insert({
+        syllabus_id: syllabus.id,
+        event_type: 'download',
+        user_agent: navigator.userAgent,
+      });
+
       const proxyUrl = getProxiedFileUrl(syllabus.slug || syllabus.id);
       
       // Fetch the file through proxy
