@@ -12,6 +12,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import SyllabusManagement from "./pages/admin/SyllabusManagement";
 import QRCodeGenerator from "./pages/admin/QRCodeGenerator";
 import FacultyManagement from "./pages/admin/FacultyManagement";
+import SyllabusAnalytics from "./pages/admin/SyllabusAnalytics";
 import ContentManagement from "./pages/admin/ContentManagement";
 import SyllabusView from "./pages/SyllabusView";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ const App = () => (
             }>
               <Route index element={<Dashboard />} />
               <Route path="syllabus" element={<SyllabusManagement />} />
+              <Route path="analytics" element={<SyllabusAnalytics />} />
               <Route path="qr-generator" element={<QRCodeGenerator />} />
               <Route path="faculties" element={<FacultyManagement />} />
               <Route path="content" element={<ContentManagement />} />
