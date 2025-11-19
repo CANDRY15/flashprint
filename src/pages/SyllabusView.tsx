@@ -35,7 +35,7 @@ const SyllabusView = () => {
   const [syllabus, setSyllabus] = useState<SyllabusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showInterstitialAd, setShowInterstitialAd] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"view" | null>(null);
+  const [pendingAction, setPendingAction] = useState<"view" | "download" | null>(null);
 
   useEffect(() => {
     const fetchSyllabus = async () => {
@@ -96,7 +96,7 @@ const SyllabusView = () => {
     return `${supabaseUrl}/functions/v1/syllabus-file/${slugOrId}`;
   };
 
-  const handleDownload = async () => {
+  const performDownload = async () => {
     if (!syllabus?.id) {
       toast({
         title: "Fichier non disponible",
@@ -158,6 +158,11 @@ const SyllabusView = () => {
     }
   };
 
+  const handleDownload = () => {
+    setPendingAction("download");
+    setShowInterstitialAd(true);
+  };
+
   // Helper function to check if file is PDF
   const isPdfFile = (fileUrl: string | null) => {
     if (!fileUrl) return false;
@@ -191,6 +196,8 @@ const SyllabusView = () => {
     if (pendingAction === "view" && syllabus?.id) {
       const proxyUrl = getProxiedFileUrl(syllabus.slug || syllabus.id);
       window.open(proxyUrl, '_blank');
+    } else if (pendingAction === "download") {
+      performDownload();
     }
     
     setPendingAction(null);
