@@ -125,9 +125,9 @@ const SyllabusManagement = () => {
   };
 
   const generateQrCode = (syllabusId: string, syllabusSlug: string | null = null) => {
-    // Generate URL that points to the syllabus view page using slug if available
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/syllabus/${syllabusSlug || syllabusId}?qr=1`;
+    // Generate URL that points directly to the edge function serving the PDF
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    return `${supabaseUrl}/functions/v1/syllabus-file/${syllabusSlug || syllabusId}`;
   };
 
   const handleEdit = (syllabus: Syllabus) => {
