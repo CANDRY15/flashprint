@@ -9,8 +9,6 @@ import { Download, BookOpen, Calendar, User, ArrowLeft, ExternalLink } from "luc
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
-import AdSense from "@/components/AdSense";
-import InterstitialAd from "@/components/InterstitialAd";
 
 interface SyllabusData {
   id: string;
@@ -34,8 +32,6 @@ const SyllabusView = () => {
   const { toast } = useToast();
   const [syllabus, setSyllabus] = useState<SyllabusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showInterstitialAd, setShowInterstitialAd] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"view" | "download" | null>(null);
 
   useEffect(() => {
     const fetchSyllabus = async () => {
@@ -87,13 +83,6 @@ const SyllabusView = () => {
         event_type: isFromQR ? 'qr_scan' : 'view',
         user_agent: navigator.userAgent,
       });
-
-      // Show interstitial ad after 3 seconds for QR code visitors
-      const timer = setTimeout(() => {
-        setShowInterstitialAd(true);
-      }, 3000);
-
-      return () => clearTimeout(timer);
     };
 
     fetchSyllabus();
@@ -174,8 +163,7 @@ const SyllabusView = () => {
   };
 
   const handleDownload = () => {
-    setPendingAction("download");
-    setShowInterstitialAd(true);
+    performDownload();
   };
 
   // Helper function to check if file is PDF
@@ -201,21 +189,10 @@ const SyllabusView = () => {
   };
 
   const handleViewClick = () => {
-    setPendingAction("view");
-    setShowInterstitialAd(true);
-  };
-
-  const handleAdClose = () => {
-    setShowInterstitialAd(false);
-    
-    if (pendingAction === "view" && syllabus?.id) {
+    if (syllabus?.id) {
       const proxyUrl = getProxiedFileUrl(syllabus.slug || syllabus.id);
       window.open(proxyUrl, '_blank');
-    } else if (pendingAction === "download") {
-      performDownload();
     }
-    
-    setPendingAction(null);
   };
 
   if (isLoading) {
@@ -306,10 +283,6 @@ const SyllabusView = () => {
                 </div>
               </div>
 
-              {/* AdSense - Top Banner */}
-              <div className="my-6">
-                <AdSense slot="3456789012" format="horizontal" />
-              </div>
 
               {/* Document Preview or Info */}
               {syllabus.file_url && (
@@ -356,10 +329,6 @@ const SyllabusView = () => {
                 </p>
               </div>
 
-              {/* AdSense - Mid Content Rectangle */}
-              <div className="my-6">
-                <AdSense slot="4567890123" format="rectangle" />
-              </div>
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -407,14 +376,6 @@ const SyllabusView = () => {
         </div>
       </div>
       <Footer />
-
-      {/* Interstitial Ad Dialog */}
-      <InterstitialAd
-        isOpen={showInterstitialAd}
-        onClose={handleAdClose}
-        adSlot="5678901234"
-        autoCloseDelay={5}
-      />
     </>
   );
 };
