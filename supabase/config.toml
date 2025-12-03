@@ -1,1 +1,4 @@
 project_id = "exrcfrfzdszejxzkcrbi"
+
+[functions.syllabus-file]
+verify_jwt = false
