@@ -167,9 +167,9 @@ const QRCodeGenerator = () => {
 
       if (slugError) throw slugError;
 
-      // Generate QR code URL pointing to the syllabus page (using slug if available)
-      const baseUrl = window.location.origin;
-      const qrCode = `${baseUrl}/syllabus/${slugData || insertedData.id}?qr=1`;
+      // Generate QR code URL pointing directly to the edge function serving the PDF
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const qrCode = `${supabaseUrl}/functions/v1/syllabus-file/${slugData || insertedData.id}`;
       
       // Update with slug and QR code
       const { error: updateError } = await supabase
