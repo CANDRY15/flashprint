@@ -15,6 +15,7 @@ import FacultyManagement from "./pages/admin/FacultyManagement";
 import SyllabusAnalytics from "./pages/admin/SyllabusAnalytics";
 import ContentManagement from "./pages/admin/ContentManagement";
 import SyllabusView from "./pages/SyllabusView";
+import PdfView from "./pages/PdfView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="content" element={<ContentManagement />} />
             </Route>
             <Route path="/syllabus/:slugOrId" element={<SyllabusView />} />
+            <Route path="/pdf/:slugOrId" element={<PdfView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
