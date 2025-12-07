@@ -540,11 +540,12 @@ const QRCodeGenerator = () => {
                         )}
 
                         {file && (
-                          <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                            <div className="text-center">
-                              <Upload className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                              <p className="text-xs font-medium">{file.name}</p>
-                            </div>
+                          <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden">
+                            <iframe
+                              src={URL.createObjectURL(file)}
+                              className="w-full h-full border-0"
+                              title="Aperçu du PDF"
+                            />
                           </div>
                         )}
 
