@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, BookOpen, Calendar, User, ArrowLeft, ExternalLink } from "lucide-react";
+import { Download, BookOpen, Calendar, User, ArrowLeft, ExternalLink, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
+import SocialShare from "@/components/SocialShare";
 
 interface SyllabusData {
   id: string;
@@ -327,6 +328,19 @@ const SyllabusView = () => {
                   à tout moment, même si vous perdez votre version papier. Vous pouvez le télécharger
                   gratuitement et le consulter sur tous vos appareils.
                 </p>
+              </div>
+
+              {/* Social Share */}
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  <Share2 className="h-5 w-5" />
+                  Partager ce syllabus
+                </h3>
+                <SocialShare 
+                  url={window.location.href}
+                  title={`${syllabus.title} - FlashPrint`}
+                  description={`Syllabus de ${syllabus.professor} - ${syllabus.year}`}
+                />
               </div>
 
 

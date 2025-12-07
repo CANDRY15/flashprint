@@ -24,30 +24,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, currentSession) => {
+        console.log('Auth state changed:', event, currentSession?.user?.email);
         
-        // Defer admin check to avoid blocking
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus(session.user.id);
-          }, 0);
-        } else {
+        // Update state synchronously
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        // Handle specific events
+        if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
+          setLoading(false);
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Defer admin check to avoid deadlock
+          if (currentSession?.user) {
+            setTimeout(() => {
+              checkAdminStatus(currentSession.user.id);
+            }, 0);
+          }
+          setLoading(false);
+        } else if (event === 'INITIAL_SESSION') {
+          // Initial session loaded
+          if (currentSession?.user) {
+            setTimeout(() => {
+              checkAdminStatus(currentSession.user.id);
+            }, 0);
+          }
+          setLoading(false);
         }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      console.log('Existing session:', existingSession?.user?.email);
+      setSession(existingSession);
+      setUser(existingSession?.user ?? null);
       
-      if (session?.user) {
-        await checkAdminStatus(session.user.id);
+      if (existingSession?.user) {
+        checkAdminStatus(existingSession.user.id);
       }
       setLoading(false);
     });
